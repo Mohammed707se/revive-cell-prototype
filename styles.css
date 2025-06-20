@@ -5,12 +5,193 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Cairo', sans-serif;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-    color: #ffffff;
-    min-height: 100vh;
+:root {
+    --primary-bg: #1a1f37;
+    --card-bg: #242b45;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --accent-green: #4CAF50;
+    --accent-red: #FF5722;
+    --accent-blue: #2196F3;
+    --accent-yellow: #FFC107;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto !important;
     overflow-x: hidden;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+/* Main Container */
+.dashboard-container {
+    width: 100%;
+    min-height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Stats Row */
+.stats-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-card h3 {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--accent-green);
+}
+
+.stat-trend.negative {
+    color: var(--accent-red);
+}
+
+/* Gauges Row */
+.gauges-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.gauge-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gauge-card canvas {
+    width: 100% !important;
+    max-width: 200px;
+    margin-bottom: 10px;
+}
+
+.gauge-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.gauge-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Charts Grid */
+.charts-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
+}
+
+.chart-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.chart-container {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+/* Icons */
+.trend-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.trend-icon.up {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: var(--accent-green);
+}
+
+.trend-icon.down {
+    background-color: rgba(255, 87, 34, 0.2);
+    color: var(--accent-red);
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1200px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-card {
+        height: 350px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+    
+    .stats-row,
+    .gauges-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .gauge-card {
+        height: 200px;
+    }
+    
+    .chart-card {
+        height: 300px;
+    }
 }
 
 /* Container */
@@ -44,7 +225,6 @@ body {
 }
 
 @keyframes float {
-
     0%,
     100% {
         transform: translateY(0px);
@@ -783,5 +963,345 @@ body {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Dashboard KPI Section */
+.kpi-section {
+    margin: 2rem 0;
+}
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.kpi-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.kpi-card canvas {
+    width: 100% !important;
+    height: 150px !important;
+    margin: 1rem auto;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Battery Aging Analysis */
+.aging-analysis {
+    margin: 2rem 0;
+}
+
+.aging-analysis .card {
+    padding: 1.5rem;
+}
+
+.aging-analysis canvas {
+    width: 100% !important;
+    height: 300px !important;
+    margin: 1rem 0;
+}
+
+.aging-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.legend-color.new { background: #4CAF50; }
+.legend-color.used { background: #FFC107; }
+.legend-color.critical { background: #F44336; }
+
+/* Performance Trends */
+.trends-section {
+    margin: 2rem 0;
+}
+
+.trends-section .card {
+    padding: 1.5rem;
+}
+
+.trends-section canvas {
+    width: 100% !important;
+    height: 300px !important;
+    margin: 1rem 0;
+}
+
+/* Health Distribution */
+.health-distribution {
+    margin: 2rem 0;
+}
+
+.health-distribution .card {
+    padding: 1.5rem;
+}
+
+.health-distribution canvas {
+    width: 100% !important;
+    height: 300px !important;
+    margin: 1rem 0;
+}
+
+/* Real-time Monitoring */
+.monitoring-section {
+    margin: 2rem 0;
+}
+
+.monitoring-section .card {
+    padding: 1.5rem;
+}
+
+.monitoring-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.monitor-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+}
+
+.monitor-card h4 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.monitor-card canvas {
+    width: 100% !important;
+    height: 120px !important;
+    margin: 0.5rem auto;
+}
+
+.monitor-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-top: 0.5rem;
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Chart Tooltips */
+.chartjs-tooltip {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 4px !important;
+    color: white !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .kpi-row {
+        grid-template-columns: 1fr;
+    }
+
+    .monitoring-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kpi-card canvas,
+    .monitor-card canvas {
+        height: 100px !important;
+    }
+
+    .aging-analysis canvas,
+    .trends-section canvas,
+    .health-distribution canvas {
+        height: 250px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .monitoring-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .aging-analysis canvas,
+    .trends-section canvas,
+    .health-distribution canvas {
+        height: 200px !important;
+    }
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+/* Top Stats */
+.stats-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Gauges Row */
+.gauges-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.gauge-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Charts Grid */
+.charts-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    height: 100%;
+}
+
+/* Chart Specific Styles */
+.aging-chart, .trends-chart, .health-chart, .savings-chart {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: calc(100% - 30px) !important;
+    max-height: 300px;
+}
+
+/* Remove any scrolling */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+section#dashboard {
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Stat Values */
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.total-receivable .stat-value { color: #2196F3; }
+.total-payable .stat-value { color: #FF5722; }
+.success-rate .stat-value { color: #4CAF50; }
+.efficiency-rate .stat-value { color: #9C27B0; }
+
+/* Gauge Styles */
+.gauge-card canvas {
+    width: 100% !important;
+    height: 100px !important;
+}
+
+.gauge-value {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+/* Chart Headers */
+.chart-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Ensure all content fits in viewport */
+@media screen and (min-height: 600px) {
+    .dashboard-container {
+        grid-template-rows: auto auto 1fr 1fr;
+    }
+}
+
+@media screen and (max-height: 600px) {
+    .dashboard-container {
+        grid-template-rows: auto auto 1fr 1fr;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .stat-card, .gauge-card, .chart-card {
+        padding: 0.5rem;
     }
 }

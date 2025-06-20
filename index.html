@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Chart.js and Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 </head>
 
 <body>
@@ -162,89 +166,93 @@
 
             <!-- Dashboard Section -->
             <section id="dashboard" class="section">
-                <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-battery-full"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="total-batteries">0</h3>
-                            <p>إجمالي البطاريات المفحوصة</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon revived">
-                            <i class="fas fa-recycle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="revived-batteries">0</h3>
-                            <p>البطاريات المُحياة</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon energy">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="energy-saved">0</h3>
-                            <p>الطاقة المُوفرة (kWh)</p>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon savings">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="money-saved">0</h3>
-                            <p>التوفير المالي (ريال)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Real-time Monitoring Charts -->
-                <div class="monitoring-charts">
-                    <div class="chart-row">
-                        <div class="chart-card">
-                            <h4><i class="fas fa-bolt"></i> الفولتية المباشرة</h4>
-                            <canvas id="voltageChart"></canvas>
-                            <div class="chart-value">
-                                <span id="current-voltage">1.2V</span>
+                <div class="dashboard-container">
+                    <!-- Stats Row -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <h3>إجمالي البطاريات</h3>
+                            <div class="stat-value" id="total-batteries">0</div>
+                            <div class="stat-trend">
+                                <span class="trend-icon up"><i class="fas fa-arrow-up"></i></span>
+                                <span>16% عن الشهر الماضي</span>
                             </div>
                         </div>
-                        <div class="chart-card">
-                            <h4><i class="fas fa-thermometer-half"></i> درجة الحرارة</h4>
-                            <canvas id="temperatureChart"></canvas>
-                            <div class="chart-value">
-                                <span id="current-temperature">25°C</span>
+                        <div class="stat-card">
+                            <h3>البطاريات المُحياة</h3>
+                            <div class="stat-value" id="revived-batteries">0</div>
+                            <div class="stat-trend">
+                                <span class="trend-icon up"><i class="fas fa-arrow-up"></i></span>
+                                <span>22% عن الشهر الماضي</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>نسبة النجاح</h3>
+                            <div class="stat-value" id="successRatio">0%</div>
+                            <div class="stat-trend">
+                                <span class="trend-icon up"><i class="fas fa-arrow-up"></i></span>
+                                <span>11% عن الأسبوع الماضي</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>معدل الكفاءة</h3>
+                            <div class="stat-value" id="efficiencyRatio">0%</div>
+                            <div class="stat-trend negative">
+                                <span class="trend-icon down"><i class="fas fa-arrow-down"></i></span>
+                                <span>28% عن الأسبوع الماضي</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="chart-row">
-                        <div class="chart-card">
-                            <h4><i class="fas fa-tachometer-alt"></i> التيار المقاس</h4>
-                            <canvas id="currentChart"></canvas>
-                            <div class="chart-value">
-                                <span id="current-amperage">0.8A</span>
-                            </div>
+                    <!-- KPI Gauges -->
+                    <div class="gauges-row">
+                        <div class="gauge-card">
+                            <canvas id="currentRatioGauge"></canvas>
+                            <div class="gauge-value">1.86%</div>
+                            <div class="gauge-label">المعدل الحالي</div>
                         </div>
-                        <div class="chart-card">
-                            <h4><i class="fas fa-exclamation-triangle"></i> مستوى المخاطر</h4>
-                            <canvas id="riskChart"></canvas>
-                            <div class="chart-value risk-level">
-                                <span id="current-risk">منخفض</span>
-                            </div>
+                        <div class="gauge-card">
+                            <canvas id="dsiGauge"></canvas>
+                            <div class="gauge-value">10 أيام</div>
+                            <div class="gauge-label">متوسط وقت المعالجة</div>
+                        </div>
+                        <div class="gauge-card">
+                            <canvas id="dsoGauge"></canvas>
+                            <div class="gauge-value">7 أيام</div>
+                            <div class="gauge-label">متوسط وقت الإحياء</div>
+                        </div>
+                        <div class="gauge-card">
+                            <canvas id="dpoGauge"></canvas>
+                            <div class="gauge-value">28 يوم</div>
+                            <div class="gauge-label">متوسط عمر البطارية</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="chart-container">
-                    <div class="card">
-                        <h3><i class="fas fa-chart-pie"></i> توزيع أنواع البطاريات</h3>
-                        <canvas id="batteryChart"></canvas>
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>تحليل عمر البطاريات</h3>
+                            <div class="chart-container">
+                                <canvas id="batteryAgingChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>توزيع صحة البطاريات</h3>
+                            <div class="chart-container">
+                                <canvas id="healthDistributionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>اتجاهات الأداء</h3>
+                            <div class="chart-container">
+                                <canvas id="performanceTrendsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>معدل النجاح التراكمي</h3>
+                            <div class="chart-container">
+                                <canvas id="cumulativeSuccessChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -261,8 +269,6 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@faker-js/faker@8.0.0/dist/faker.min.js"></script>
     <script src="script.js"></script>
 </body>
 

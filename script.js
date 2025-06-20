@@ -13,28 +13,64 @@ class ReviveCellAI {
     }
 
     init() {
-        this.setupEventListeners();
-        this.generateBatteryDatabase();
-        this.updateDashboard();
-        this.renderHistory();
-        this.setupChart();
+        try {
+            console.log('Initializing ReviveCell AI...');
+            
+            // Setup event listeners first
+            this.setupEventListeners();
+            
+            // Generate database
+            this.generateBatteryDatabase();
+            
+            // Initialize charts
+            this.setupChart();
+            
+            // Update UI
+            this.updateDashboard();
+            this.renderHistory();
+            
+            console.log('Initialization complete');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+        }
     }
 
     setupEventListeners() {
-        // Navigation
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.switchSection(e.target.dataset.section);
+        try {
+            console.log('Setting up event listeners...');
+            
+            // Navigation
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.switchSection(e.target.dataset.section);
+                });
             });
-        });
 
-        // Analysis button
-        document.getElementById('analyze-btn').addEventListener('click', () => {
-            this.analyzeBattery();
-        });
+            // Analysis button
+            const analyzeBtn = document.getElementById('analyze-btn');
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', () => {
+                    this.analyzeBattery();
+                });
+            } else {
+                console.error('Analyze button not found');
+            }
 
-        // Auto-fill random data for demo
-        this.setupAutoFill();
+            // Battery type change
+            const batteryTypeSelect = document.getElementById('battery_type');
+            if (batteryTypeSelect) {
+                batteryTypeSelect.addEventListener('change', (e) => {
+                    this.fillRandomData(e.target.value);
+                });
+            } else {
+                console.error('Battery type select not found');
+            }
+
+            console.log('Event listeners setup complete');
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
+        }
     }
 
     setupAutoFill() {
@@ -101,28 +137,42 @@ class ReviveCellAI {
             return;
         }
 
-        // Show loading
-        document.getElementById('loading').classList.remove('hidden');
-        document.getElementById('results-card').classList.add('hidden');
+        try {
+            // Show loading
+            const loadingElement = document.getElementById('loading');
+            const resultsCard = document.getElementById('results-card');
+            
+            if (loadingElement) loadingElement.classList.remove('hidden');
+            if (resultsCard) resultsCard.classList.add('hidden');
 
-        // Simulate AI processing time
-        await this.sleep(2000);
+            // Simulate AI processing time
+            await this.sleep(2000);
 
-        // Run AI analysis
-        const result = this.runAIAnalysis(batteryData);
+            // Run AI analysis
+            const result = this.runAIAnalysis(batteryData);
 
-        // Show results
-        this.displayResults(result);
+            // Add success probability to result
+            result.successProbability = this.calculateSuccessProbability(result.score);
 
-        // Save to history
-        this.saveToHistory(batteryData, result);
+            // Show results
+            this.displayResults(result);
 
-        // Update stats
-        this.updateStats(result);
+            // Save to history
+            this.saveToHistory(batteryData, result);
 
-        // Hide loading, show results
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('results-card').classList.remove('hidden');
+            // Update stats
+            this.updateStats(result);
+
+            // Hide loading, show results
+            if (loadingElement) loadingElement.classList.add('hidden');
+            if (resultsCard) resultsCard.classList.remove('hidden');
+            
+            // Scroll to results
+            resultsCard.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('Error during battery analysis:', error);
+            alert('حدث خطأ أثناء تحليل البطارية. يرجى المحاولة مرة أخرى.');
+        }
     }
 
     validateInputs(data) {
@@ -247,42 +297,101 @@ class ReviveCellAI {
         };
     }
 
+    calculateSuccessProbability(score) {
+        // Convert score to probability
+        let probability = score;
+        
+        // Ensure probability is between 0 and 100
+        probability = Math.max(0, Math.min(100, probability));
+        
+        // Round to nearest integer
+        return Math.round(probability);
+    }
+
     displayResults(result) {
-        // Update status icon and content
-        const statusIcon = document.getElementById('status-icon');
-        statusIcon.className = `result-icon ${result.statusClass}`;
-        statusIcon.innerHTML = result.statusClass === 'good' ? '<i class="fas fa-check-circle"></i>' :
-            result.statusClass === 'warning' ? '<i class="fas fa-exclamation-triangle"></i>' :
-                '<i class="fas fa-times-circle"></i>';
+        try {
+            // Get all required elements
+            const elements = {
+                statusIcon: document.getElementById('status-icon'),
+                batteryStatus: document.getElementById('battery-status'),
+                pulseInfo: document.getElementById('pulse-info'),
+                safetyMargin: document.getElementById('safety-margin'),
+                actionSuggestion: document.getElementById('action-suggestion'),
+                successProbability: document.getElementById('success-probability'),
+                successPercentage: document.getElementById('success-percentage')
+            };
 
-        document.getElementById('battery-status').textContent = result.status;
+            // Check if all elements exist
+            for (const [key, element] of Object.entries(elements)) {
+                if (!element) {
+                    console.error(`Element not found: ${key}`);
+                    return;
+                }
+            }
 
-        // Pulse information
-        if (result.pulseVoltage > 0) {
-            document.getElementById('pulse-info').innerHTML =
-                `الفولتية: ${result.pulseVoltage}V<br>المدة: ${result.pulseDuration}ms`;
-        } else {
-            document.getElementById('pulse-info').textContent = 'غير مطلوبة';
+            // Update status icon and text
+            elements.statusIcon.className = 'result-icon';
+            
+            // Add appropriate icon and class based on status
+            if (result.leakage_detected) {
+                this.updateStatusDisplay(elements, 'danger', 'exclamation-triangle', 
+                    'تسريب مكتشف', 'لا يمكن إحياء البطارية - يجب إعادة تدويرها');
+            } else if (result.score >= 80) {
+                this.updateStatusDisplay(elements, 'good', 'check-circle',
+                    'صالحة للاستخدام', 'البطارية في حالة جيدة ويمكن استخدامها مباشرة');
+            } else if (result.score >= 60) {
+                this.updateStatusDisplay(elements, 'warning', 'sync',
+                    'تحتاج إلى إحياء', 'يمكن إحياء البطارية باستخدام نبضة كهربائية خفيفة');
+            } else if (result.score >= 30) {
+                this.updateStatusDisplay(elements, 'warning', 'battery-quarter',
+                    'ضعيفة - قابلة للإحياء', 'تحتاج إلى معالجة مكثفة لإحيائها');
+            } else {
+                this.updateStatusDisplay(elements, 'danger', 'times-circle',
+                    'غير قابلة للإحياء', 'البطارية تالفة بشكل كبير - يُنصح بإعادة التدوير');
+            }
+
+            // Update other result elements
+            elements.pulseInfo.innerHTML = result.pulseVoltage ? 
+                `${result.pulseVoltage}V لمدة ${result.pulseDuration}ms` : 
+                'لا تحتاج إلى نبضة';
+            
+            elements.safetyMargin.textContent = result.safetyMargin;
+            
+            elements.actionSuggestion.innerHTML = `${result.actionSuggestion}<br>
+                <small>${this.getActionDetail(result)}</small>`;
+
+            // Update success probability
+            elements.successProbability.style.width = `${result.successProbability}%`;
+            elements.successPercentage.textContent = `${result.successProbability}%`;
+
+            // Update charts
+            this.updateCharts(result);
+            
+        } catch (error) {
+            console.error('Error displaying results:', error);
+            throw error;
         }
+    }
 
-        // Safety margin
-        document.getElementById('safety-margin').textContent = result.safetyMargin;
+    updateStatusDisplay(elements, className, iconName, status, description) {
+        elements.statusIcon.classList.add(className);
+        elements.statusIcon.innerHTML = `<i class="fas fa-${iconName}"></i>`;
+        elements.batteryStatus.innerHTML = `<span class="${className}-text">${status}</span><br>
+            <small>${description}</small>`;
+    }
 
-        // Action suggestion
-        document.getElementById('action-suggestion').textContent = result.actionSuggestion;
-
-        // Success probability
-        const progressBar = document.getElementById('success-probability');
-        const percentage = document.getElementById('success-percentage');
-
-        progressBar.style.width = '0%';
-        percentage.textContent = '0%';
-
-        // Animate progress bar
-        setTimeout(() => {
-            progressBar.style.width = `${result.successProbability}%`;
-            percentage.textContent = `${result.successProbability}%`;
-        }, 100);
+    getActionDetail(result) {
+        if (result.leakage_detected) {
+            return 'يجب التخلص من البطارية بشكل آمن عبر مراكز إعادة التدوير';
+        } else if (result.score >= 80) {
+            return 'البطارية صالحة للاستخدام المباشر دون الحاجة لأي معالجة';
+        } else if (result.score >= 60) {
+            return 'نبضة خفيفة كافية لاستعادة قدرة البطارية';
+        } else if (result.score >= 30) {
+            return 'تحتاج لعدة نبضات مع مراقبة درجة الحرارة والجهد';
+        } else {
+            return 'حالة البطارية لا تسمح بإحيائها بشكل آمن';
+        }
     }
 
     saveToHistory(batteryData, result) {
@@ -303,23 +412,117 @@ class ReviveCellAI {
     }
 
     updateStats(result) {
-        this.stats.totalBatteries++;
+        try {
+            // Update total batteries count
+            this.stats.totalBatteries++;
 
-        if (result.successProbability > 60) {
-            this.stats.revivedBatteries++;
-            this.stats.energySaved += this.randomInRange(0.1, 2.5);
-            this.stats.moneySaved += this.randomInRange(5, 25);
+            // Update revived batteries count if the battery was successfully revived
+            if (result.score >= 70 && !result.leakage_detected) {
+                this.stats.revivedBatteries++;
+            }
+
+            // Calculate success ratio
+            const successRatio = (this.stats.revivedBatteries / this.stats.totalBatteries) * 100;
+
+            // Calculate estimated energy savings (kWh)
+            const avgBatteryCapacity = {
+                'AA': 0.003, // 3Wh
+                'AAA': 0.001, // 1Wh
+                'Li-ion': 0.01, // 10Wh
+                'Laptop': 0.05 // 50Wh
+            };
+
+            // Update energy saved
+            this.stats.energySaved += avgBatteryCapacity[result.battery_type] || 0;
+
+            // Update money saved (assuming 0.5 SAR per kWh and battery cost)
+            const batteryCost = {
+                'AA': 5,
+                'AAA': 4,
+                'Li-ion': 50,
+                'Laptop': 200
+            };
+            this.stats.moneySaved += (batteryCost[result.battery_type] || 0);
+
+            // Get all required elements
+            const elements = {
+                totalBatteries: document.getElementById('total-batteries'),
+                revivedBatteries: document.getElementById('revived-batteries'),
+                energySaved: document.getElementById('energy-saved'),
+                moneySaved: document.getElementById('money-saved'),
+                successRatio: document.getElementById('successRatio'),
+                efficiencyRatio: document.getElementById('efficiencyRatio')
+            };
+
+            // Update elements if they exist
+            if (elements.totalBatteries) {
+                elements.totalBatteries.textContent = this.stats.totalBatteries;
+            }
+            
+            if (elements.revivedBatteries) {
+                elements.revivedBatteries.textContent = this.stats.revivedBatteries;
+            }
+            
+            if (elements.energySaved) {
+                elements.energySaved.textContent = this.stats.energySaved.toFixed(2);
+            }
+            
+            if (elements.moneySaved) {
+                elements.moneySaved.textContent = Math.round(this.stats.moneySaved);
+            }
+            
+            if (elements.successRatio) {
+                elements.successRatio.textContent = `${successRatio.toFixed(1)}%`;
+                elements.successRatio.title = `تم إحياء ${this.stats.revivedBatteries} من أصل ${this.stats.totalBatteries} بطارية`;
+            }
+
+            // Calculate and update efficiency ratio
+            const efficiencyRatio = (this.stats.energySaved / this.stats.totalBatteries) * 100;
+            if (elements.efficiencyRatio) {
+                elements.efficiencyRatio.textContent = `${efficiencyRatio.toFixed(1)}%`;
+            }
+
+            // Update the success gauge if it exists
+            if (this.successGauge) {
+                this.updateGauge(this.successGauge, successRatio);
+            }
+
+            // Save stats to localStorage
+            localStorage.setItem('reviveCell_stats', JSON.stringify(this.stats));
+            
+        } catch (error) {
+            console.error('Error updating stats:', error);
         }
-
-        localStorage.setItem('reviveCell_stats', JSON.stringify(this.stats));
-        this.updateDashboard();
     }
 
     updateDashboard() {
-        document.getElementById('total-batteries').textContent = this.stats.totalBatteries;
-        document.getElementById('revived-batteries').textContent = this.stats.revivedBatteries;
-        document.getElementById('energy-saved').textContent = this.stats.energySaved.toFixed(1);
-        document.getElementById('money-saved').textContent = Math.round(this.stats.moneySaved);
+        try {
+            const elements = {
+                totalBatteries: document.getElementById('total-batteries'),
+                revivedBatteries: document.getElementById('revived-batteries'),
+                energySaved: document.getElementById('energy-saved'),
+                moneySaved: document.getElementById('money-saved')
+            };
+
+            // Update elements if they exist
+            if (elements.totalBatteries) {
+                elements.totalBatteries.textContent = this.stats.totalBatteries;
+            }
+            
+            if (elements.revivedBatteries) {
+                elements.revivedBatteries.textContent = this.stats.revivedBatteries;
+            }
+            
+            if (elements.energySaved) {
+                elements.energySaved.textContent = this.stats.energySaved.toFixed(1);
+            }
+            
+            if (elements.moneySaved) {
+                elements.moneySaved.textContent = Math.round(this.stats.moneySaved);
+            }
+        } catch (error) {
+            console.error('Error updating dashboard:', error);
+        }
     }
 
     renderHistory() {
@@ -343,223 +546,288 @@ class ReviveCellAI {
     }
 
     setupChart() {
-        // Setup pie chart
-        const ctx = document.getElementById('batteryChart').getContext('2d');
+        try {
+            // Register Chart.js plugins
+            Chart.register(ChartDataLabels);
+            
+            // Set default font family for all charts
+            Chart.defaults.font.family = 'Segoe UI, Arial, sans-serif';
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+            Chart.defaults.plugins.legend.labels.usePointStyle = true;
+            Chart.defaults.plugins.legend.position = 'bottom';
 
-        // Generate chart data from history
-        const batteryTypes = ['AA', 'AAA', 'Li-ion', 'Laptop'];
-        const data = batteryTypes.map(type =>
-            this.analysisHistory.filter(item => item.battery_type === type).length
-        );
+            // Initialize all charts
+            this.initializeKPIGauges();
+            this.initializeAgingChart();
+            this.initializePerformanceTrends();
+            this.initializeHealthDistribution();
+            this.initializeMonitoringGauges();
 
-        new Chart(ctx, {
-            type: 'pie',
+            // Start real-time updates
+            this.startRealTimeUpdates();
+        } catch (error) {
+            console.error('Error setting up charts:', error);
+        }
+    }
+
+    initializeKPIGauges() {
+        // Current Ratio Gauge
+        this.currentRatioGauge = new Chart(document.getElementById('currentRatioGauge'), {
+            type: 'doughnut',
             data: {
-                labels: batteryTypes,
                 datasets: [{
-                    data: data.every(d => d === 0) ? [25, 20, 30, 25] : data, // Demo data if no history
-                    backgroundColor: [
-                        '#22c55e',  // Green
-                        '#3b82f6',  // Blue
-                        '#f59e0b',  // Orange
-                        '#8b5cf6'   // Purple
-                    ],
-                    borderColor: '#ffffff',
-                    borderWidth: 2
+                    data: [1.86, 1.14],
+                    backgroundColor: [colors.primary, 'rgba(33, 150, 243, 0.1)'],
+                    borderWidth: 0
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                circumference: 180,
+                rotation: -90,
+                cutout: '85%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // DSI Gauge
+        this.dsiGauge = new Chart(document.getElementById('dsiGauge'), {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [10, 21],
+                    backgroundColor: [colors.warning, 'rgba(255, 193, 7, 0.1)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                circumference: 180,
+                rotation: -90,
+                cutout: '85%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // DSO Gauge
+        this.dsoGauge = new Chart(document.getElementById('dsoGauge'), {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [7, 24],
+                    backgroundColor: [colors.danger, 'rgba(255, 87, 34, 0.1)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                circumference: 180,
+                rotation: -90,
+                cutout: '85%',
+            plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // DPO Gauge
+        this.dpoGauge = new Chart(document.getElementById('dpoGauge'), {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [28, 3],
+                    backgroundColor: [colors.success, 'rgba(76, 175, 80, 0.1)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                circumference: 180,
+                rotation: -90,
+                cutout: '85%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    initializeAgingChart() {
+        const ctx = document.getElementById('batteryAgingChart');
+        this.batteryAgingChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['حالي', '1-30', '31-60', '61-90', '90+'],
+                datasets: [{
+                    label: 'بطاريات جيدة',
+                    data: [2500, 2000, 1000, 800, 500],
+                    backgroundColor: colors.success
+                }, {
+                    label: 'بطاريات ضعيفة',
+                    data: [1500, 1000, 600, 400, 200],
+                    backgroundColor: colors.warning
+                }]
+            },
+            options: {
+                ...commonOptions,
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#ffffff',
-                            font: {
-                                family: 'Cairo',
-                                size: 14
-                            },
-                            padding: 20
-                        }
+                        position: 'bottom'
                     }
                 }
             }
         });
-
-        // Setup monitoring charts
-        this.setupMonitoringCharts();
     }
 
-    setupMonitoringCharts() {
-        // Initialize real-time data arrays
-        this.realTimeData = {
-            voltage: [],
-            temperature: [],
-            current: [],
-            risk: [],
-            labels: []
-        };
+    initializePerformanceTrends() {
+        const ctx = document.getElementById('performanceTrendsChart');
+        this.performanceTrendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                datasets: [{
+                    label: 'نسبة النجاح',
+                    data: [65, 70, 75, 72, 78, 75],
+                    borderColor: colors.success,
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'معدل الكفاءة',
+                    data: [45, 52, 49, 55, 50, 52],
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: commonOptions
+        });
+    }
 
-        // Generate initial data points
-        for (let i = 0; i < 20; i++) {
-            this.realTimeData.labels.push(i + 's');
-            this.realTimeData.voltage.push(this.randomInRange(0.8, 1.6));
-            this.realTimeData.temperature.push(this.randomInRange(20, 45));
-            this.realTimeData.current.push(this.randomInRange(0.1, 1.2));
-            this.realTimeData.risk.push(this.randomInRange(0, 5));
-        }
-
-        // Common chart options
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    display: false
-                },
-                y: {
-                    display: false
-                }
+    initializeHealthDistribution() {
+        const ctx = document.getElementById('healthDistributionChart');
+        this.healthDistributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['ممتاز', 'جيد', 'متوسط', 'ضعيف', 'حرج'],
+                datasets: [{
+                    data: [35, 25, 20, 15, 5],
+                    backgroundColor: [
+                        colors.success,
+                        colors.primary,
+                        colors.warning,
+                        colors.purple,
+                        colors.danger
+                    ],
+                    borderWidth: 0
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            elements: {
-                point: {
-                    radius: 0
-                }
-            },
-            interaction: {
-                intersect: false
+            options: {
+                ...commonOptions,
+                cutout: '60%'
             }
-        };
+        });
+    }
 
-        // Voltage Chart
-        this.voltageChart = new Chart(document.getElementById('voltageChart').getContext('2d'), {
-            type: 'line',
+    initializeMonitoringGauges() {
+        // Initialize all gauges
+        this.voltageGauge = new Chart(document.getElementById('voltageGauge'), {
+            type: 'doughnut',
             data: {
-                labels: this.realTimeData.labels,
                 datasets: [{
-                    data: this.realTimeData.voltage,
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2
+                    data: [70, 30],
+                    backgroundColor: ['#2196F3', '#f0f0f0'],
+                    borderWidth: 0
                 }]
-            },
-            options: chartOptions
+            }
         });
 
-        // Temperature Chart
-        this.temperatureChart = new Chart(document.getElementById('temperatureChart').getContext('2d'), {
-            type: 'line',
+        this.tempGauge = new Chart(document.getElementById('temperatureGauge'), {
+            type: 'doughnut',
             data: {
-                labels: this.realTimeData.labels,
                 datasets: [{
-                    data: this.realTimeData.temperature,
-                    borderColor: '#f59e0b',
-                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2
+                    data: [60, 40],
+                    backgroundColor: ['#FF9800', '#f0f0f0'],
+                    borderWidth: 0
                 }]
-            },
-            options: chartOptions
+            }
         });
 
-        // Current Chart
-        this.currentChart = new Chart(document.getElementById('currentChart').getContext('2d'), {
-            type: 'line',
+        this.resistanceGauge = new Chart(document.getElementById('resistanceGauge'), {
+            type: 'doughnut',
             data: {
-                labels: this.realTimeData.labels,
                 datasets: [{
-                    data: this.realTimeData.current,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2
+                    data: [85, 15],
+                    backgroundColor: ['#4CAF50', '#f0f0f0'],
+                    borderWidth: 0
                 }]
-            },
-            options: chartOptions
+            }
         });
 
-        // Risk Chart
-        this.riskChart = new Chart(document.getElementById('riskChart').getContext('2d'), {
-            type: 'line',
+        this.healthGauge = new Chart(document.getElementById('healthGauge'), {
+            type: 'doughnut',
             data: {
-                labels: this.realTimeData.labels,
                 datasets: [{
-                    data: this.realTimeData.risk,
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2
+                    data: [85, 15],
+                    backgroundColor: ['#4CAF50', '#f0f0f0'],
+                    borderWidth: 0
                 }]
-            },
-            options: chartOptions
+            }
         });
-
-        // Start real-time updates
-        this.startRealTimeUpdates();
     }
 
     startRealTimeUpdates() {
         setInterval(() => {
-            // Update voltage
-            const newVoltage = this.randomInRange(0.8, 1.6);
-            this.realTimeData.voltage.shift();
-            this.realTimeData.voltage.push(newVoltage);
-            this.voltageChart.update('none');
-            document.getElementById('current-voltage').textContent = newVoltage.toFixed(1) + 'V';
+            // Update voltage (3.5V - 4.2V range)
+            const voltage = this.randomInRange(3.5, 4.2);
+            document.getElementById('currentVoltage').textContent = `${voltage.toFixed(1)}V`;
+            this.updateGauge(this.voltageGauge, (voltage - 3.5) / 0.7 * 100);
 
-            // Update temperature
-            const newTemp = this.randomInRange(20, 45);
-            this.realTimeData.temperature.shift();
-            this.realTimeData.temperature.push(newTemp);
-            this.temperatureChart.update('none');
-            document.getElementById('current-temperature').textContent = Math.round(newTemp) + '°C';
+            // Update temperature (20°C - 40°C range)
+            const temp = this.randomInRange(20, 40);
+            document.getElementById('currentTemp').textContent = `${Math.round(temp)}°C`;
+            this.updateGauge(this.tempGauge, (temp - 20) / 20 * 100);
 
-            // Update current
-            const newCurrent = this.randomInRange(0.1, 1.2);
-            this.realTimeData.current.shift();
-            this.realTimeData.current.push(newCurrent);
-            this.currentChart.update('none');
-            document.getElementById('current-amperage').textContent = newCurrent.toFixed(1) + 'A';
+            // Update resistance (0.2Ω - 0.5Ω range)
+            const resistance = this.randomInRange(0.2, 0.5);
+            document.getElementById('currentResistance').textContent = `${resistance.toFixed(2)}Ω`;
+            this.updateGauge(this.resistanceGauge, (0.5 - resistance) / 0.3 * 100);
 
-            // Update risk
-            const newRisk = this.randomInRange(0, 5);
-            this.realTimeData.risk.shift();
-            this.realTimeData.risk.push(newRisk);
-            this.riskChart.update('none');
+            // Update health (70% - 100% range)
+            const health = this.randomInRange(70, 100);
+            document.getElementById('currentHealth').textContent = `${Math.round(health)}%`;
+            this.updateGauge(this.healthGauge, health);
 
-            const riskLevel = newRisk < 2 ? 'منخفض' : newRisk < 4 ? 'متوسط' : 'مرتفع';
-            const riskElement = document.getElementById('current-risk');
-            riskElement.textContent = riskLevel;
-
-            // Update risk color
-            const riskContainer = riskElement.parentElement;
-            riskContainer.className = 'chart-value risk-level';
-            if (newRisk >= 4) {
-                riskContainer.style.background = 'rgba(239, 68, 68, 0.1)';
-                riskContainer.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                riskElement.style.color = '#ef4444';
-            } else if (newRisk >= 2) {
-                riskContainer.style.background = 'rgba(245, 158, 11, 0.1)';
-                riskContainer.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                riskElement.style.color = '#f59e0b';
-            } else {
-                riskContainer.style.background = 'rgba(34, 197, 94, 0.1)';
-                riskContainer.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-                riskElement.style.color = '#22c55e';
+            // Update KPI gauges occasionally
+            if (Math.random() < 0.3) {
+                const newSuccess = this.randomInRange(70, 80);
+                const newEfficiency = this.randomInRange(0.8, 1.5);
+                
+                document.getElementById('successRatio').textContent = `${newSuccess.toFixed(2)}%`;
+                document.getElementById('efficiencyRatio').textContent = `${newEfficiency.toFixed(2)}%`;
+                
+                this.updateGauge(this.currentRatioGauge, newSuccess);
+                this.updateGauge(this.dsiGauge, newEfficiency);
             }
+        }, 2000);
+    }
 
-        }, 2000); // Update every 2 seconds
+    updateGauge(gauge, value) {
+        if (gauge && gauge.data && gauge.data.datasets) {
+            gauge.data.datasets[0].data = [value, 100 - value];
+            gauge.update('none'); // Use 'none' mode for smoother updates
+        }
+    }
+
+    formatNumber(value) {
+        if (value >= 1000000) {
+            return `${(value / 1000000).toFixed(1)}M`;
+        } else if (value >= 1000) {
+            return `${(value / 1000).toFixed(1)}K`;
+        }
+        return value.toString();
     }
 
     generateBatteryDatabase() {
@@ -646,15 +914,81 @@ class ReviveCellAI {
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    updateCharts(result) {
+        try {
+            // Update KPI gauges
+            if (this.kpiGauges) {
+                this.kpiGauges.forEach(gauge => {
+                    this.updateGauge(gauge, result.score);
+                });
+            }
+
+            // Update aging chart
+            if (this.agingChart) {
+                const ageData = this.analysisHistory.map(item => ({
+                    age: item.age_months,
+                    score: item.score
+                }));
+                this.agingChart.data.datasets[0].data = ageData;
+                this.agingChart.update();
+            }
+
+            // Update performance trends
+            if (this.performanceChart) {
+                const performanceData = this.analysisHistory.slice(0, 10).reverse();
+                this.performanceChart.data.labels = performanceData.map(item => 
+                    new Date(item.timestamp).toLocaleDateString('ar-SA')
+                );
+                this.performanceChart.data.datasets[0].data = performanceData.map(item => item.score);
+                this.performanceChart.update();
+            }
+
+            // Update health distribution
+            if (this.healthChart) {
+                const healthData = this.analysisHistory.reduce((acc, item) => {
+                    const healthIndex = this.getHealthIndex(item.score);
+                    acc[healthIndex] = (acc[healthIndex] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                this.healthChart.data.datasets[0].data = Object.values(healthData);
+                this.healthChart.update();
+            }
+        } catch (error) {
+            console.error('Error updating charts:', error);
+        }
+    }
+
+    getAgeGroup(ageMonths) {
+        if (ageMonths <= 1) return 0;
+        if (ageMonths <= 30) return 1;
+        if (ageMonths <= 60) return 2;
+        if (ageMonths <= 90) return 3;
+        return 4;
+    }
+
+    getHealthIndex(score) {
+        if (score >= 90) return 0; // ممتازة
+        if (score >= 70) return 1; // جيدة
+        if (score >= 50) return 2; // متوسطة
+        if (score >= 30) return 3; // ضعيفة
+        return 4; // حرجة
+    }
+
+    calculateSuccessRate() {
+        if (this.stats.totalBatteries === 0) return 0;
+        return (this.stats.revivedBatteries / this.stats.totalBatteries) * 100;
+    }
 }
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new ReviveCellAI();
+    window.reviveCellApp = new ReviveCellAI();
 
     // Auto-fill demo data on page load
     setTimeout(() => {
-        app.fillRandomData('AA');
+        window.reviveCellApp.fillRandomData('AA');
     }, 500);
 
     // Add download CSV functionality
