@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReviveCell - إحياء البطاريات بالذكاء الاصطناعي</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-battery-half"></i>
+                <h1>ReviveCell</h1>
+            </div>
+            <p class="tagline">إحياء البطاريات بالذكاء الاصطناعي</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-section="analyzer">
+                <i class="fas fa-search"></i>
+                محلل البطاريات
+            </button>
+            <button class="nav-btn" data-section="dashboard">
+                <i class="fas fa-chart-line"></i>
+                لوحة التحكم
+            </button>
+            <button class="nav-btn" data-section="history">
+                <i class="fas fa-history"></i>
+                السجل
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Battery Analyzer Section -->
+            <section id="analyzer" class="section active">
+                <div class="card">
+                    <h2><i class="fas fa-battery-three-quarters"></i> فحص البطارية</h2>
+
+                    <!-- Device Simulation Notice -->
+                    <div class="device-notice">
+                        <div class="notice-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="notice-content">
+                            <h4>محاكاة جهاز ReviveCell</h4>
+                            <p>في الاستخدام الفعلي، سيتم جلب هذه البيانات تلقائياً من جهاز ReviveCell عبر موجات RF
+                                وأجهزة الاستشعار. هذه محاكاة لأغراض العرض.</p>
+                        </div>
+                    </div>
+
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="battery_type">نوع البطارية</label>
+                            <select id="battery_type">
+                                <option value="AA">AA</option>
+                                <option value="AAA">AAA</option>
+                                <option value="Li-ion">Li-ion</option>
+                                <option value="Laptop">Laptop</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="voltage">الفولتية (V)</label>
+                            <input type="number" id="voltage" step="0.1" placeholder="1.2">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="internal_resistance">المقاومة الداخلية (Ω)</label>
+                            <input type="number" id="internal_resistance" step="0.01" placeholder="0.3">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="temperature">درجة الحرارة (°C)</label>
+                            <input type="number" id="temperature" placeholder="25">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="cycle_count">عدد دورات الشحن</label>
+                            <input type="number" id="cycle_count" placeholder="100">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="age_months">العمر بالأشهر</label>
+                            <input type="number" id="age_months" placeholder="12">
+                        </div>
+                    </div>
+
+                    <button id="analyze-btn" class="analyze-btn">
+                        <i class="fas fa-brain"></i>
+                        تحليل بالذكاء الاصطناعي
+                    </button>
+
+                    <div id="loading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>جاري تحليل البطارية...</p>
+                    </div>
+                </div>
+
+                <!-- Results Card -->
+                <div id="results-card" class="card results-card hidden">
+                    <h3><i class="fas fa-clipboard-check"></i> نتائج التحليل</h3>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-icon" id="status-icon">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div class="result-content">
+                                <h4>حالة البطارية</h4>
+                                <p id="battery-status">قيد التحليل...</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon pulse-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="result-content">
+                                <h4>النبضة المقترحة</h4>
+                                <p id="pulse-info">قيد التحليل...</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon safety-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="result-content">
+                                <h4>هامش الأمان</h4>
+                                <p id="safety-margin">قيد التحليل...</p>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-icon action-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="result-content">
+                                <h4>الإجراء المقترح</h4>
+                                <p id="action-suggestion">قيد التحليل...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <h4>احتمالية النجاح</h4>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="success-probability"></div>
+                        </div>
+                        <span id="success-percentage">0%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-battery-full"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-batteries">0</h3>
+                            <p>إجمالي البطاريات المفحوصة</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon revived">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="revived-batteries">0</h3>
+                            <p>البطاريات المُحياة</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon energy">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="energy-saved">0</h3>
+                            <p>الطاقة المُوفرة (kWh)</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon savings">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="money-saved">0</h3>
+                            <p>التوفير المالي (ريال)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="card">
+                        <h3><i class="fas fa-chart-pie"></i> توزيع أنواع البطاريات</h3>
+                        <canvas id="batteryChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="section">
+                <div class="card">
+                    <h3><i class="fas fa-history"></i> سجل الفحوصات</h3>
+                    <div class="history-list" id="history-list">
+                        <!-- History items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@faker-js/faker@8.0.0/dist/faker.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
