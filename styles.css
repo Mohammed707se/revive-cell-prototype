@@ -464,6 +464,71 @@ body {
     font-size: 0.9em;
 }
 
+/* Monitoring Charts */
+.monitoring-charts {
+    margin-bottom: 30px;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.chart-card h4 {
+    color: #22c55e;
+    margin-bottom: 15px;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: 120px !important;
+    margin-bottom: 10px;
+}
+
+.chart-value {
+    text-align: center;
+    padding: 8px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.chart-value span {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #22c55e;
+}
+
+.chart-value.risk-level {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.chart-value.risk-level span {
+    color: #3b82f6;
+}
+
 /* Chart Container */
 .chart-container {
     margin-top: 30px;
@@ -626,6 +691,18 @@ body {
 
     .dashboard-grid {
         grid-template-columns: 1fr;
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card {
+        padding: 15px;
+    }
+
+    .chart-card canvas {
+        height: 100px !important;
     }
 
     .result-item {

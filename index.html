@@ -204,6 +204,43 @@
                     </div>
                 </div>
 
+                <!-- Real-time Monitoring Charts -->
+                <div class="monitoring-charts">
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <h4><i class="fas fa-bolt"></i> الفولتية المباشرة</h4>
+                            <canvas id="voltageChart"></canvas>
+                            <div class="chart-value">
+                                <span id="current-voltage">1.2V</span>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4><i class="fas fa-thermometer-half"></i> درجة الحرارة</h4>
+                            <canvas id="temperatureChart"></canvas>
+                            <div class="chart-value">
+                                <span id="current-temperature">25°C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <h4><i class="fas fa-tachometer-alt"></i> التيار المقاس</h4>
+                            <canvas id="currentChart"></canvas>
+                            <div class="chart-value">
+                                <span id="current-amperage">0.8A</span>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4><i class="fas fa-exclamation-triangle"></i> مستوى المخاطر</h4>
+                            <canvas id="riskChart"></canvas>
+                            <div class="chart-value risk-level">
+                                <span id="current-risk">منخفض</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="chart-container">
                     <div class="card">
                         <h3><i class="fas fa-chart-pie"></i> توزيع أنواع البطاريات</h3>

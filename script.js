@@ -343,6 +343,7 @@ class ReviveCellAI {
     }
 
     setupChart() {
+        // Setup pie chart
         const ctx = document.getElementById('batteryChart').getContext('2d');
 
         // Generate chart data from history
@@ -385,6 +386,180 @@ class ReviveCellAI {
                 }
             }
         });
+
+        // Setup monitoring charts
+        this.setupMonitoringCharts();
+    }
+
+    setupMonitoringCharts() {
+        // Initialize real-time data arrays
+        this.realTimeData = {
+            voltage: [],
+            temperature: [],
+            current: [],
+            risk: [],
+            labels: []
+        };
+
+        // Generate initial data points
+        for (let i = 0; i < 20; i++) {
+            this.realTimeData.labels.push(i + 's');
+            this.realTimeData.voltage.push(this.randomInRange(0.8, 1.6));
+            this.realTimeData.temperature.push(this.randomInRange(20, 45));
+            this.realTimeData.current.push(this.randomInRange(0.1, 1.2));
+            this.realTimeData.risk.push(this.randomInRange(0, 5));
+        }
+
+        // Common chart options
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            elements: {
+                point: {
+                    radius: 0
+                }
+            },
+            interaction: {
+                intersect: false
+            }
+        };
+
+        // Voltage Chart
+        this.voltageChart = new Chart(document.getElementById('voltageChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: this.realTimeData.labels,
+                datasets: [{
+                    data: this.realTimeData.voltage,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Temperature Chart
+        this.temperatureChart = new Chart(document.getElementById('temperatureChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: this.realTimeData.labels,
+                datasets: [{
+                    data: this.realTimeData.temperature,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Current Chart
+        this.currentChart = new Chart(document.getElementById('currentChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: this.realTimeData.labels,
+                datasets: [{
+                    data: this.realTimeData.current,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Risk Chart
+        this.riskChart = new Chart(document.getElementById('riskChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: this.realTimeData.labels,
+                datasets: [{
+                    data: this.realTimeData.risk,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Start real-time updates
+        this.startRealTimeUpdates();
+    }
+
+    startRealTimeUpdates() {
+        setInterval(() => {
+            // Update voltage
+            const newVoltage = this.randomInRange(0.8, 1.6);
+            this.realTimeData.voltage.shift();
+            this.realTimeData.voltage.push(newVoltage);
+            this.voltageChart.update('none');
+            document.getElementById('current-voltage').textContent = newVoltage.toFixed(1) + 'V';
+
+            // Update temperature
+            const newTemp = this.randomInRange(20, 45);
+            this.realTimeData.temperature.shift();
+            this.realTimeData.temperature.push(newTemp);
+            this.temperatureChart.update('none');
+            document.getElementById('current-temperature').textContent = Math.round(newTemp) + '°C';
+
+            // Update current
+            const newCurrent = this.randomInRange(0.1, 1.2);
+            this.realTimeData.current.shift();
+            this.realTimeData.current.push(newCurrent);
+            this.currentChart.update('none');
+            document.getElementById('current-amperage').textContent = newCurrent.toFixed(1) + 'A';
+
+            // Update risk
+            const newRisk = this.randomInRange(0, 5);
+            this.realTimeData.risk.shift();
+            this.realTimeData.risk.push(newRisk);
+            this.riskChart.update('none');
+
+            const riskLevel = newRisk < 2 ? 'منخفض' : newRisk < 4 ? 'متوسط' : 'مرتفع';
+            const riskElement = document.getElementById('current-risk');
+            riskElement.textContent = riskLevel;
+
+            // Update risk color
+            const riskContainer = riskElement.parentElement;
+            riskContainer.className = 'chart-value risk-level';
+            if (newRisk >= 4) {
+                riskContainer.style.background = 'rgba(239, 68, 68, 0.1)';
+                riskContainer.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                riskElement.style.color = '#ef4444';
+            } else if (newRisk >= 2) {
+                riskContainer.style.background = 'rgba(245, 158, 11, 0.1)';
+                riskContainer.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                riskElement.style.color = '#f59e0b';
+            } else {
+                riskContainer.style.background = 'rgba(34, 197, 94, 0.1)';
+                riskContainer.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+                riskElement.style.color = '#22c55e';
+            }
+
+        }, 2000); // Update every 2 seconds
     }
 
     generateBatteryDatabase() {
