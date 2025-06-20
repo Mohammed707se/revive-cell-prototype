@@ -17,17 +17,17 @@ class ReviveCellAI {
             console.log('Initializing ReviveCell AI...');
             
             // Setup event listeners first
-            this.setupEventListeners();
+        this.setupEventListeners();
             
             // Generate database
-            this.generateBatteryDatabase();
+        this.generateBatteryDatabase();
             
             // Initialize charts
             this.setupChart();
             
             // Update UI
-            this.updateDashboard();
-            this.renderHistory();
+        this.updateDashboard();
+        this.renderHistory();
             
             console.log('Initialization complete');
         } catch (error) {
@@ -39,20 +39,20 @@ class ReviveCellAI {
         try {
             console.log('Setting up event listeners...');
             
-            // Navigation
+        // Navigation
             const navButtons = document.querySelectorAll('.nav-btn');
             navButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    this.switchSection(e.target.dataset.section);
-                });
+            btn.addEventListener('click', (e) => {
+                this.switchSection(e.target.dataset.section);
             });
+        });
 
-            // Analysis button
+        // Analysis button
             const analyzeBtn = document.getElementById('analyze-btn');
             if (analyzeBtn) {
                 analyzeBtn.addEventListener('click', () => {
-                    this.analyzeBattery();
-                });
+            this.analyzeBattery();
+        });
             } else {
                 console.error('Analyze button not found');
             }
@@ -138,32 +138,32 @@ class ReviveCellAI {
         }
 
         try {
-            // Show loading
+        // Show loading
             const loadingElement = document.getElementById('loading');
             const resultsCard = document.getElementById('results-card');
             
             if (loadingElement) loadingElement.classList.remove('hidden');
             if (resultsCard) resultsCard.classList.add('hidden');
 
-            // Simulate AI processing time
-            await this.sleep(2000);
+        // Simulate AI processing time
+        await this.sleep(2000);
 
-            // Run AI analysis
-            const result = this.runAIAnalysis(batteryData);
+        // Run AI analysis
+        const result = this.runAIAnalysis(batteryData);
 
             // Add success probability to result
             result.successProbability = this.calculateSuccessProbability(result.score);
 
-            // Show results
-            this.displayResults(result);
+        // Show results
+        this.displayResults(result);
 
-            // Save to history
-            this.saveToHistory(batteryData, result);
+        // Save to history
+        this.saveToHistory(batteryData, result);
 
-            // Update stats
-            this.updateStats(result);
+        // Update stats
+        this.updateStats(result);
 
-            // Hide loading, show results
+        // Hide loading, show results
             if (loadingElement) loadingElement.classList.add('hidden');
             if (resultsCard) resultsCard.classList.remove('hidden');
             
@@ -414,11 +414,11 @@ class ReviveCellAI {
     updateStats(result) {
         try {
             // Update total batteries count
-            this.stats.totalBatteries++;
+        this.stats.totalBatteries++;
 
             // Update revived batteries count if the battery was successfully revived
             if (result.score >= 70 && !result.leakage_detected) {
-                this.stats.revivedBatteries++;
+            this.stats.revivedBatteries++;
             }
 
             // Calculate success ratio
@@ -488,7 +488,7 @@ class ReviveCellAI {
             }
 
             // Save stats to localStorage
-            localStorage.setItem('reviveCell_stats', JSON.stringify(this.stats));
+        localStorage.setItem('reviveCell_stats', JSON.stringify(this.stats));
             
         } catch (error) {
             console.error('Error updating stats:', error);
@@ -553,16 +553,99 @@ class ReviveCellAI {
             // Set default font family for all charts
             Chart.defaults.font.family = 'Segoe UI, Arial, sans-serif';
             Chart.defaults.font.size = 12;
-            Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+            Chart.defaults.color = 'rgba(255, 255, 255, 0.8)';
             Chart.defaults.plugins.legend.labels.usePointStyle = true;
             Chart.defaults.plugins.legend.position = 'bottom';
 
-            // Initialize all charts
-            this.initializeKPIGauges();
-            this.initializeAgingChart();
-            this.initializePerformanceTrends();
-            this.initializeHealthDistribution();
-            this.initializeMonitoringGauges();
+            // Theme Colors
+            const colors = {
+                primary: '#2196F3',
+                success: '#4CAF50',
+                warning: '#FFC107',
+                danger: '#FF5722',
+                purple: '#9C27B0',
+                background: '#242b45',
+                grid: 'rgba(255, 255, 255, 0.1)',
+                text: 'rgba(255, 255, 255, 0.8)'
+            };
+
+            // Common Chart Options
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            padding: 20,
+                            color: colors.text,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: colors.background,
+                        titleColor: colors.text,
+                        bodyColor: colors.text,
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y;
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        grid: {
+                            color: colors.grid
+                        },
+                        ticks: {
+                            color: colors.text,
+                            backdropColor: 'transparent'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: colors.grid,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: colors.text,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: colors.grid,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: colors.text,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Initialize all charts with improved visuals
+            this.initializeKPIGauges(colors, commonOptions);
+            this.initializeAgingChart(colors, commonOptions);
+            this.initializePerformanceTrends(colors, commonOptions);
+            this.initializeHealthDistribution(colors, commonOptions);
+            this.initializeMonitoringGauges(colors, commonOptions);
 
             // Start real-time updates
             this.startRealTimeUpdates();
@@ -571,7 +654,7 @@ class ReviveCellAI {
         }
     }
 
-    initializeKPIGauges() {
+    initializeKPIGauges(colors, commonOptions) {
         // Current Ratio Gauge
         this.currentRatioGauge = new Chart(document.getElementById('currentRatioGauge'), {
             type: 'doughnut',
@@ -653,7 +736,7 @@ class ReviveCellAI {
         });
     }
 
-    initializeAgingChart() {
+    initializeAgingChart(colors, commonOptions) {
         const ctx = document.getElementById('batteryAgingChart');
         this.batteryAgingChart = new Chart(ctx, {
             type: 'bar',
@@ -680,7 +763,7 @@ class ReviveCellAI {
         });
     }
 
-    initializePerformanceTrends() {
+    initializePerformanceTrends(colors, commonOptions) {
         const ctx = document.getElementById('performanceTrendsChart');
         this.performanceTrendsChart = new Chart(ctx, {
             type: 'line',
@@ -706,7 +789,7 @@ class ReviveCellAI {
         });
     }
 
-    initializeHealthDistribution() {
+    initializeHealthDistribution(colors, commonOptions) {
         const ctx = document.getElementById('healthDistributionChart');
         this.healthDistributionChart = new Chart(ctx, {
             type: 'doughnut',
@@ -731,7 +814,7 @@ class ReviveCellAI {
         });
     }
 
-    initializeMonitoringGauges() {
+    initializeMonitoringGauges(colors, commonOptions) {
         // Initialize all gauges
         this.voltageGauge = new Chart(document.getElementById('voltageGauge'), {
             type: 'doughnut',
